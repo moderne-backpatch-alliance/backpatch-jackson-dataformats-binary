@@ -184,6 +184,23 @@ public abstract class BaseTestForSmile
         fail("Expected an exception with one of substrings ("+Arrays.asList(matches)+"): got one with message \""+msg+"\"");
     }
     
+    protected static byte[] concat(byte[] ... chunks)
+    {
+        int len = 0;
+        for (byte[] chunk : chunks) {
+            len += chunk.length;
+        }
+        ByteArrayOutputStream bout = new ByteArrayOutputStream(len);
+        for (byte[] chunk : chunks) {
+            try {
+                bout.write(chunk);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return bout.toByteArray();
+    }
+
     protected void _verifyBytes(byte[] actBytes, byte... expBytes)
     {
         Assert.assertArrayEquals(expBytes, actBytes);

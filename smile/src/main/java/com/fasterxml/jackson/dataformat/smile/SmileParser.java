@@ -2530,16 +2530,20 @@ public class SmileParser extends SmileParserBase
      */
     protected void _skip7BitBinary() throws IOException
     {
-        int origBytes = _readUnsignedVInt();
-        // Ok; 8 encoded bytes for 7 payload bytes first
-        int chunks = origBytes / 7;
-        int encBytes = chunks * 8;
-        // and for last 0 - 6 bytes, last+1 (except none if no leftovers)
-        origBytes -= 7 * chunks;
-        if (origBytes > 0) {
-            encBytes += 1 + origBytes;
+        _skip7BitBinary(_readUnsignedVInt());
+    }
+
+    private void _skip7BitBinary(int origBytes) throws IOException
+    {
+        final long encBytes = _encoded7BitLength(origBytes);
+        // sanity check: not all length markers valid; due to signed int(32)
+        // calculations maximum length only 7/8 of 2^31
+        if (encBytes > Integer.MAX_VALUE) {
+            _reportError(
+                    "Invalid content: invalid 7-bit binary encoded byte length (0x%X) exceeds maximum valid value",
+                    origBytes);
         }
-        _skipBytes(encBytes);
+        _skipBytes((int) encBytes);
     }
     
     /*
